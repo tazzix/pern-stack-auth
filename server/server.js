@@ -1,18 +1,90 @@
-const express = require("express");
-const app = express();
-const cors = require("cors");
+#!/usr/bin/env node
+const http = require('http');
 
-//middleware
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+// require('../config/env');
+const App = require('./app');
 
-app.use(cors());
-app.use(express.json());
+let server = null;
+let port = 0;
 
-//routes
+function main() {
+  App().then((app) => {
+    // Function for normalizing a port into a number, string, or false.
+    function normalizePort(val) {
+      port = parseInt(val, 10);
 
-app.use("/authentication", require("./routes/jwtAuth"));
+      if (Number.isNaN(port)) {
+        // named pipe
+        return val;
+      }
 
-app.use("/dashboard", require("./routes/dashboard"));
+      if (port >= 0) {
+        // port number
+        return port;
+      }
 
-app.listen(5000, () => {
-  console.log(`Server is starting on port 5000`);
-});
+      return false;
+    }
+
+    // Event listener for HTTP server "error" event.
+    function onError(error) {
+      if (error.syscall !== 'listen') {
+        throw error;
+      }
+
+      const bind = typeof port === 'string'
+        ? `Pipe ${port}`
+        : `Port ${port}`;
+
+      // handle specific listen errors with friendly messages
+      switch (error.code) {
+        case 'EACCES':
+          console.error(`${bind} requires elevated privileges`);
+          process.exit(1);
+          break;
+        case 'EADDRINUSE':
+          console.error(`${bind} is already in use`);
+          process.exit(1);
+          break;
+        default:
+          throw error;
+      }
+    }
+
+    // Event listener for HTTP server "listening" event.
+    function onListening() {
+      const addr = server.address();
+      const bind = typeof addr === 'string'
+        ? `pipe ${addr}`
+        : `port ${addr.port}`;
+      console.log(`Listening on ${bind}`);
+    }
+
+    // ----------
+    // MAIN CODE
+    // ----------
+
+    app.set('port', port);
+
+    // Get port from environment and store in Express.
+    port = normalizePort(process.env.PORT || '5000');
+
+    // Create HTTP server.
+    server = http.createServer(app);
+
+    // Listen on provided port, on all network interfaces.
+    server.listen(port);
+    server.on('error', onError);
+    server.on('listening', onListening);
+  }).catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
+
+if (require.main === module) {
+  main();
+} else {
+  module.exports = main;
+}

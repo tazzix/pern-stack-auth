@@ -1,17 +1,19 @@
-import React, { Fragment, useState } from "react";
+import React, { useState } from 'react';
 
 const EditTodo = ({ todo, setTodosChange }) => {
-  //editText function
+  const [description, setDescription] = useState(todo.description);
+
+  // editText function
   const editText = async (id) => {
     try {
       const body = { description };
       const myHeaders = new Headers();
 
-      myHeaders.append("Content-Type", "application/json");
-      myHeaders.append("jwt_token", localStorage.token);
+      myHeaders.append('Content-Type', 'application/json');
+      myHeaders.append('jwt_token', localStorage.token);
 
       await fetch(`http://localhost:5000/dashboard/todos/${id}`, {
-        method: "PUT",
+        method: 'PUT',
         headers: myHeaders,
         body: JSON.stringify(body),
       });
@@ -22,23 +24,28 @@ const EditTodo = ({ todo, setTodosChange }) => {
     }
   };
 
-  const [description, setDescription] = useState(todo.description);
+  const handleTodoEvent = () => {
+    setDescription(todo.description);
+  };
 
   return (
-    <Fragment>
+    <>
       <button
         type="button"
         className="btn btn-warning"
         data-toggle="modal"
-        data-target={`#id${todo.todo_id}`}
+        data-target={`#id${todo.id}`}
       >
         Edit
       </button>
-      {/* id = "id21"*/}
+      {/* id = "id21" */}
       <div
         className="modal"
-        id={`id${todo.todo_id}`}
-        onClick={() => setDescription(todo.description)}
+        role="button"
+        tabIndex={0}
+        id={`id${todo.id}`}
+        onClick={handleTodoEvent}
+        onKeyPress={handleTodoEvent}
       >
         <div className="modal-dialog">
           <div className="modal-content">
@@ -68,7 +75,7 @@ const EditTodo = ({ todo, setTodosChange }) => {
                 type="button"
                 className="btn btn-warning"
                 data-dismiss="modal"
-                onClick={() => editText(todo.todo_id)}
+                onClick={() => editText(todo.id)}
               >
                 Edit
               </button>
@@ -84,7 +91,7 @@ const EditTodo = ({ todo, setTodosChange }) => {
           </div>
         </div>
       </div>
-    </Fragment>
+    </>
   );
 };
 

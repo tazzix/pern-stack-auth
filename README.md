@@ -1,26 +1,43 @@
-# :zap: PERN Full Stack Todo
+FORKED FROM: https://github.com/AndrewJBateman/pern-stack-auth
 
-* PostgreSQL Express React Node (PERN) full-stack app, integrates React frontend with Node.js backend. Tutorial code from [The Stoic Programmers](https://www.youtube.com/channel/UCAPuqvFWmUg_gc_AZHUBPsA) (see 'Inspiration' below)
+# :zap: PERN Full Stack Baseline
+
+* PostgreSQL Express React Node (PERN) full-stack app, integrates React frontend with Node.js backend.
 
 *** Note: to open web links in a new window use: _ctrl+click on link_**
 
 ## :page_facing_up: Table of contents
 
 * [General info](#general-info)
-* [Screenshots](#screenshots)
 * [Technologies](#technologies)
 * [Setup](#setup)
 * [Features](#features)
 * [Status](#status)
 * [Inspiration](#inspiration)
-* [Contact](#contact)
 
 ## :books: General info
 
+### Common for Backend and Frontend
+
+* ESLint with AirBnB rules for following code conventions
+* Jest for unit testing
+* All communication via RESTful APIs
+
 ### Backend
 
-* PostgreSQL needs to be installed and running - I started it from my Windows 10 PostgreSQL 12 dropdown option 'SQL shell (psql)'
+* PostgreSQL needs to be installed and running
+* Sequelize as both ORM and DB management (migrations / seed data)
 * Postman used to test the backend before frontend was available
+* General CORS, JSON WebToken, Dotenv for storing environment variables / credentials (in gitignore)
+
+#### Commands
+
+* Install dependencies: `npm install`
+* Linting with ESLint: `npm run lint`
+* Attempt to fix lint errors: `npm run lint:fix`
+* Unit tests with Jest: `npm run test`
+* Start node server: `npm run start`
+* Sequelize commands: `npx sequelize-cli ...` e.g. `db:migrate:status`, `db:migrate`, `db:migrate:undo`, `db:seed`
 
 ### Frontend
 
@@ -28,18 +45,19 @@
 * [JavaScript XML (JSX)](https://reactjs.org/docs/introducing-jsx.html) used to write HTML elements in Javascript
 * [React Fragments](https://reactjs.org/docs/fragments.html) used to show table of todos as a row with columns in the DDM
 
-## :camera: Screenshots
+#### Commands
 
-![Backend screenshot](./img/postgresql.png)
-![Frontend & backend screenshot](./img/todos.png)
-![Frontend screenshot](./img/edit.png)
+* Install dependencies: `npm install`
+* Linting with ESLint: `npm run lint`
+* Attempt to fix lint errors: `npm run lint:fix`
+* Unit tests with Jest and React tests: `npm run test`
+* Start React app in dev mode: `npm run start`
 
 ## :signal_strength: Technologies - Backend
 
-* [PostgreSQL v12](https://www.postgresql.org/)
-* [PostgreSQL Installer for Windows](https://www.postgresqltutorial.com/install-postgresql/)
+* [PostgreSQL v12 / 13](https://www.postgresql.org/)
 * [Express.js middleware v4](https://expressjs.com/)
-* [Node.js v12](https://nodejs.org/es/)
+* [Node.js v12 / 14 or higher](https://nodejs.org/es/)
 * [Nodemon](https://www.npmjs.com/package/nodemon) npm module so backend server will automatically restart after code changes
 * [Postman API](https://www.postman.com/downloads/) to simulate a frontend
 
@@ -52,9 +70,9 @@
 
 * Change to `/server` directory
 * Install dependencies using `npm i`
-* Install [nodemon v2.0.2](https://www.npmjs.com/package/nodemon) globally if you don't already have it
+* Install [nodemon](https://www.npmjs.com/package/nodemon) globally if you don't already have it
 * Install [PostgreSQL](https://www.postgresql.org/) & run it (requires the password you created during installation)
-* Add database access credentials to `db.js` - recommend installing [npm dotenv](https://www.npmjs.com/package/dotenv) & using .env to hide credentials if commiting to Github
+* Add database access credentials to `config/config.js` - recommend installing [npm dotenv](https://www.npmjs.com/package/dotenv) & using .env to hide credentials if commiting to Github
 * Postgresql shell commands: `\l` list all databases. `\c` database1 connect to database1. `\dt` inspect tables. `\d+` inspect table & show relation information. `\q` to quit.
 * Run `nodemon server` for a dev server
 * `http://localhost:5000/` can be accessed for CRUD operations such as POST, GET, PUT, DELETE etc. using Postman
@@ -70,20 +88,16 @@
 * backend `index.js`: express post method used to add new todo [description] to postgreSQL database using SQL INSERT INTO statement
 
 ```javascript
-// create a todo
-app.post('/todos', async (req, res) => {
+// create a todo, using authorize middleware
+router.post('/todos', authorize, async (req, res) => {
   try {
     const { description } = req.body;
-    const newTodo = await pool.query(
-      "INSERT INTO todo (description) VALUES($1) RETURNING *",
-      [description]
-    );
-
-    res.json(newTodo.rows[0]);
+    const newTodo = await todo.create({ description, done: false, user_id: req.user.id });
+    res.json(newTodo);
   } catch (err) {
     console.error(err.message);
   }
-})
+});
 ```
 
 ## :computer: Code Examples - Frontend
@@ -119,11 +133,6 @@ app.post('/todos', async (req, res) => {
 * Uses the [Bootstrap basic table](https://www.w3schools.com/bootstrap/bootstrap_tables.asp) to list todos
 * [Bootstrap 4 Modal](https://www.w3schools.com/bootstrap4/bootstrap_modal.asp) dialog box
 
-## :clipboard: Status & To-Do List
-
-* Status: error in registration
-* To-Do: Fix errors and complete testing
-
 ## :clap: :wrench: Inspiration/General Tools
 
 * [PERN Stack Course - PostgreSQL, Express, React and Node](https://www.youtube.com/watch?v=ldYcgPKEZC8&t=116s)
@@ -133,7 +142,3 @@ app.post('/todos', async (req, res) => {
 * [React documentation](https://reactjs.org/docs/getting-started.html)
 * [Enable Emmet support for JSX in Visual Studio Code | React](https://medium.com/@eshwaren/enable-emmet-support-for-jsx-in-visual-studio-code-react-f1f5dfe8809c)
 * [js-beautify for VS Code](https://marketplace.visualstudio.com/items?itemName=HookyQR.beautify)
-
-## :envelope: Contact
-
-* Repo created by [ABateman](https://www.andrewbateman.org) - you are welcome to [send me a message](https://andrewbateman.org/contact)
